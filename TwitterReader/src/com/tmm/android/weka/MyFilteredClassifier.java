@@ -91,9 +91,10 @@ public class MyFilteredClassifier {
 	public void makeInstance() {
 		// Create the attributes, class and text
 		FastVector fvNominalVal = new FastVector(2);
-		fvNominalVal.addElement("happy");
-		fvNominalVal.addElement("sad");
-		fvNominalVal.addElement("fear");
+		fvNominalVal.addElement("Happy");
+		fvNominalVal.addElement("Stressed");
+		//fvNominalVal.addElement("sad");
+		//fvNominalVal.addElement("fear");
 		Attribute attribute1 = new Attribute("class", fvNominalVal);
 		Attribute attribute2 = new Attribute("text",(FastVector) null);
 		// Create list of instances with one element
@@ -122,7 +123,18 @@ public class MyFilteredClassifier {
 			double pred = classifier.classifyInstance(instances.instance(0));
 			System.out.println("===== Classified instance =====");
 			System.out.println("Class predicted: " + instances.classAttribute().value((int) pred));
-			return instances.classAttribute().value((int) pred);	
+			double[] probabilityDistribution = null;
+			for (int i = 0; i < instances.numInstances(); i++)
+			{
+				probabilityDistribution = classifier.distributionForInstance(instances.instance(i));
+			}
+			double classAtt1Prob = probabilityDistribution[0];
+			double classAtt2Prob = probabilityDistribution[1];
+			//double classAtt3Prob = probabilityDistribution[2];
+			System.out.println("Accuracy percentage" + classAtt1Prob*100);
+			System.out.println("Accuracy percentage" + classAtt2Prob*100);
+			//System.out.println("Accuracy percentage" + classAtt3Prob*100);
+			return instances.classAttribute().value((int) pred)+" :- "+round(classAtt2Prob,2)*100+"%";	
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -132,7 +144,14 @@ public class MyFilteredClassifier {
 		}
 
 	}
+	public static double round(double value, int places) {
+	    if (places < 0) throw new IllegalArgumentException();
 
+	    long factor = (long) Math.pow(10, places);
+	    value = value * factor;
+	    long tmp = Math.round(value);
+	    return (double) tmp / factor;
+	}
 	/**
 	 * Main method. It is an example of the usage of this class.
 	 * @param args Command-line arguments: fileData and fileModel.

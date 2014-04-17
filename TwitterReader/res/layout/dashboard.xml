@@ -15,6 +15,7 @@
         android:id="@+id/follwerListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" 
+        android:cacheColorHint="@android:color/transparent"
         android:background="@android:color/white">
     </ListView>
 

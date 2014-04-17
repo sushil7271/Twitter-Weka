@@ -1,15 +1,15 @@
 package com.tmm.Twitter;
 
-import android.app.ListActivity;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.util.Base64;
-import android.util.Log;
-import android.widget.ArrayAdapter;
-import com.google.gson.Gson;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -19,24 +19,54 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.*;
-import java.net.URLEncoder;
+import android.app.AlertDialog;
+import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.util.Base64;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+
+import com.google.gson.Gson;
+import com.tmm.android.twitter.R;
+import com.tmm.android.twitter.TweetsActivity;
+import com.tmm.android.twitter.reader.TweetReader;
+import com.tmm.android.weka.MyFilteredClassifier;
+import com.tmm.android.weka.MyFilteredLearner;
 
 /**
  * Demonstrates how to use a twitter application keys to access a user's timeline
  */
-public class MainActivity extends ListActivity {
+public class MainActivity extends ListActivity implements OnClickListener {
 
 	private ListActivity activity;
+	private String ClassifiedClass="";
 	String ScreenName = "sushil7271";//"therockncoder";
 	final static String LOG_TAG = "rnc";
+	Button Classify_follwerTweets;
+	ArrayList<Tweet> jobs ;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.follwertweets);
 		activity = this;
+
 		ScreenName= getIntent().getStringExtra("ScreenName");
+		Classify_follwerTweets=(Button)findViewById(R.id.Classify_follwerTweets);
+		Classify_follwerTweets.setOnClickListener(this);
 		downloadTweets();
 	}
 
@@ -72,13 +102,15 @@ public class MainActivity extends ListActivity {
 		// onPostExecute convert the JSON results into a Twitter object (which is an Array list of tweets
 		@Override
 		protected void onPostExecute(String result) {
+			Log.d("result", result);
 			Twitter twits = jsonToTwitter(result);
-
+			jobs=twits;
 			// lets write the results to the console as well
 			for (Tweet tweet : twits) {
 				Log.i(LOG_TAG, tweet.getText());
+				
 			}
-
+	//		jobs = TweetReader.retrieveSpecificUsersTweets((twitter4j.Twitter) twits);
 			// send the tweets to the adapter for rendering
 			ArrayAdapter<Tweet> adapter = new ArrayAdapter<Tweet>(activity, android.R.layout.simple_list_item_1, twits);
 			setListAdapter(adapter);
@@ -184,5 +216,99 @@ public class MainActivity extends ListActivity {
 			}
 			return results;
 		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+		switch (v.getId()) {
+		case R.id.Classify_follwerTweets:
+			final ProgressDialog pd = new ProgressDialog(MainActivity.this);
+			pd.setMessage("classifying Tweets please wait...");
+			pd.setCanceledOnTouchOutside(false);
+			pd.show();
+			new Thread(){
+				public void run(){
+					try {
+						MyFilteredLearner learner;
+						learner = new MyFilteredLearner();
+						//learner.loadDataset("/sdcard/New Folder/smsspam.small.arff");
+						learner.loadDataset("/sdcard/New Folder/ISEAR_Happy_Sad.arff");
+						// Evaluation mus be done before training
+						// More info in: http://weka.wikispaces.com/Use+WEKA+in+your+Java+code
+						learner.evaluate();
+						learner.learn();
+						learner.saveModel("/sdcard/New Folder/ISEAR_Happy_Sad.model");
+
+						MyFilteredClassifier classifier = new MyFilteredClassifier();
+						generateNoteOnSD(Environment.getExternalStorageDirectory()+"/New Folder/","spamtextfile.txt",jobs);
+						classifier.load(Environment.getExternalStorageDirectory()+"/New Folder/spamtextfile.txt");
+						classifier.loadModel("/sdcard/New Folder/ISEAR_Happy_Sad.model");
+						classifier.makeInstance();
+						ClassifiedClass=classifier.classify();
+						runOnUiThread(new Runnable() {
+
+
+
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								showAlert("You are "+ClassifiedClass);
+							}
+						});
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}finally {
+						pd.dismiss();
+					}
+				}
+			}.start();
+
+			break;
+
+		default:
+			break;
+		}
+	}
+
+
+
+	public void generateNoteOnSD(String Path,String sFileName, ArrayList<Tweet> sBody)
+	{
+		try
+		{
+			File root = new File(Path);
+			if (!root.exists()) {
+				root.mkdirs();
+			}
+			File gpxfile = new File(root, sFileName);
+			FileWriter writer = new FileWriter(gpxfile);
+			for (int i = 0; i < sBody.size(); i++) {
+				Log.e("tweet", sBody.get(i).getText());
+				writer.append(i+1+". "+sBody.get(i).getText());
+			}
+			writer.flush();
+			writer.close();
+			//Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+		}catch(IOException e)
+		{
+			e.printStackTrace();
+			// importError = e.getMessage();
+			//iError();
+		}
+	}
+	private void showAlert(String Message){
+		AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+		builder1.setMessage(Message);
+		builder1.setCancelable(true);
+		builder1.setPositiveButton("Ok",
+				new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
+		});
+		AlertDialog alert11 = builder1.create();
+		alert11.show();
 	}
 }

@@ -498,20 +498,24 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
 					// TODO Auto-generated method stub
 */
 					/*if (Session.isOpened()) {*/
+			Log.d("Graph API", "Graph API");
 					Session session = Session.getActiveSession();
 						Request.newGraphPathRequest( session, "me/home", new Request.Callback() {
 									@Override
 									public void onCompleted( Response response) {
 										// TODO Auto-generated
 										// method stub
+										Log.d("Graph API", "On complete");
 										JSONObject jsonObject = null;
 										JSONArray jArray = null;
 										try {
+										
 											jsonObject = new JSONObject( response.getGraphObject() .getInnerJSONObject() .toString());
 											jArray = jsonObject .getJSONArray("data");
 											for (int i = 0; i < jArray .length(); i++) {
 												JSONObject element = null;
 												element = jArray .getJSONObject(i);
+												Log.d("Graph API", "Graph API element");
 												System.out.println(element .get("id") + "\n");
 											}
 										} catch (JSONException e) {

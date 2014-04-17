@@ -214,10 +214,11 @@ containing a value of this type.
         public static final int white_bg=0x7f020023;
     }
     public static final class id {
-        public static final int ButtonLogin=0x7f04002c;
-        public static final int Classify=0x7f04002a;
-        public static final int DashBoard=0x7f040029;
-        public static final int buttonRequest=0x7f040025;
+        public static final int ButtonLogin=0x7f04002d;
+        public static final int Classify=0x7f04002b;
+        public static final int Classify_follwerTweets=0x7f040024;
+        public static final int DashBoard=0x7f04002a;
+        public static final int buttonRequest=0x7f040026;
         public static final int com_facebook_login_activity_progress_bar=0x7f040005;
         public static final int com_facebook_picker_activity_circle=0x7f040004;
         public static final int com_facebook_picker_checkbox=0x7f040007;
@@ -238,16 +239,16 @@ containing a value of this type.
         public static final int com_facebook_usersettingsfragment_login_button=0x7f040017;
         public static final int com_facebook_usersettingsfragment_logo_image=0x7f040015;
         public static final int com_facebook_usersettingsfragment_profile_name=0x7f040016;
-        public static final int editRequests=0x7f040024;
-        public static final int facebook=0x7f04002b;
+        public static final int editRequests=0x7f040025;
+        public static final int facebook=0x7f04002c;
         public static final int follwerListView=0x7f040019;
         public static final int follwer_tweets=0x7f040018;
         public static final int fragment_container=0x7f040023;
         public static final int getpostButton=0x7f040022;
         public static final int greeting=0x7f04001c;
-        public static final int job_text=0x7f040028;
+        public static final int job_text=0x7f040029;
         public static final int large=0x7f040002;
-        public static final int last_build_stat=0x7f040027;
+        public static final int last_build_stat=0x7f040028;
         public static final int login_button=0x7f04001b;
         public static final int main_ui_container=0x7f04001a;
         public static final int normal=0x7f040001;
@@ -258,7 +259,7 @@ containing a value of this type.
         public static final int postStatusUpdateButton=0x7f04001e;
         public static final int profilePicture=0x7f04001d;
         public static final int small=0x7f040000;
-        public static final int textViewResults=0x7f040026;
+        public static final int textViewResults=0x7f040027;
     }
     public static final class layout {
         public static final int com_facebook_friendpickerfragment=0x7f030000;
@@ -277,10 +278,11 @@ containing a value of this type.
         public static final int com_facebook_usersettingsfragment=0x7f03000d;
         public static final int dashboard=0x7f03000e;
         public static final int facebook=0x7f03000f;
-        public static final int graphapi=0x7f030010;
-        public static final int image_text_layout=0x7f030011;
-        public static final int main=0x7f030012;
-        public static final int main_oauth=0x7f030013;
+        public static final int follwertweets=0x7f030010;
+        public static final int graphapi=0x7f030011;
+        public static final int image_text_layout=0x7f030012;
+        public static final int main=0x7f030013;
+        public static final int main_oauth=0x7f030014;
     }
     public static final class string {
         public static final int app_id=0x7f070027;

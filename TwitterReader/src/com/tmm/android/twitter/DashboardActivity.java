@@ -29,11 +29,15 @@ public class DashboardActivity extends Activity implements OnClickListener, OnIt
 
 	ArrayList<String> FollwersNameList = new ArrayList<String>();
 	ListView follwerListView;
+	String ScreenName="";
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.dashboard);
+		if(getIntent().hasExtra("ScreenName")){
+			ScreenName= getIntent().getStringExtra("ScreenName");
+		}
 		follwerListView= (ListView)findViewById(R.id.follwerListView);
 		follwerListView.setOnItemClickListener(this);
 		Button Get_Follwer_List=(Button)findViewById(R.id.follwer_tweets);
@@ -48,7 +52,7 @@ public class DashboardActivity extends Activity implements OnClickListener, OnIt
 			Twitter t= ((TwitterApplication)getApplication()).getTwitter();
 			try {
 				PagableResponseList<User> usersResponse;
-				usersResponse = t.getFollowersList("sushil7271", -1);
+				usersResponse = t.getFollowersList(ScreenName, -1);
 				System.out.println(usersResponse);
 				for (int index = 0; index < usersResponse.size(); index++) {
 					FollwersNameList.add(usersResponse.get(index).getScreenName());
