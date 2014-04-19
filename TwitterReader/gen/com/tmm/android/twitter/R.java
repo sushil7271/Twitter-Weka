@@ -214,8 +214,8 @@ containing a value of this type.
         public static final int white_bg=0x7f020023;
     }
     public static final class id {
-        public static final int ButtonLogin=0x7f04002d;
-        public static final int Classify=0x7f04002b;
+        public static final int ButtonLogin=0x7f04002e;
+        public static final int Classify=0x7f04002c;
         public static final int Classify_follwerTweets=0x7f040024;
         public static final int DashBoard=0x7f04002a;
         public static final int buttonRequest=0x7f040026;
@@ -240,7 +240,7 @@ containing a value of this type.
         public static final int com_facebook_usersettingsfragment_logo_image=0x7f040015;
         public static final int com_facebook_usersettingsfragment_profile_name=0x7f040016;
         public static final int editRequests=0x7f040025;
-        public static final int facebook=0x7f04002c;
+        public static final int facebook=0x7f04002d;
         public static final int follwerListView=0x7f040019;
         public static final int follwer_tweets=0x7f040018;
         public static final int fragment_container=0x7f040023;
@@ -258,6 +258,7 @@ containing a value of this type.
         public static final int postPhotoButton=0x7f04001f;
         public static final int postStatusUpdateButton=0x7f04001e;
         public static final int profilePicture=0x7f04001d;
+        public static final int select_DataSet=0x7f04002b;
         public static final int small=0x7f040000;
         public static final int textViewResults=0x7f040027;
     }

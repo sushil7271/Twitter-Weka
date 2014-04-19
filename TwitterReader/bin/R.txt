@@ -73,8 +73,8 @@ int drawable icon 0x7f020020
 int drawable speech_bubble_right 0x7f020021
 int drawable wallpaper 0x7f020022
 int drawable white_bg 0x7f020023
-int id ButtonLogin 0x7f04002d
-int id Classify 0x7f04002b
+int id ButtonLogin 0x7f04002e
+int id Classify 0x7f04002c
 int id Classify_follwerTweets 0x7f040024
 int id DashBoard 0x7f04002a
 int id buttonRequest 0x7f040026
@@ -99,7 +99,7 @@ int id com_facebook_usersettingsfragment_login_button 0x7f040017
 int id com_facebook_usersettingsfragment_logo_image 0x7f040015
 int id com_facebook_usersettingsfragment_profile_name 0x7f040016
 int id editRequests 0x7f040025
-int id facebook 0x7f04002c
+int id facebook 0x7f04002d
 int id follwerListView 0x7f040019
 int id follwer_tweets 0x7f040018
 int id fragment_container 0x7f040023
@@ -117,6 +117,7 @@ int id picker_subtitle 0x7f040012
 int id postPhotoButton 0x7f04001f
 int id postStatusUpdateButton 0x7f04001e
 int id profilePicture 0x7f04001d
+int id select_DataSet 0x7f04002b
 int id small 0x7f040000
 int id textViewResults 0x7f040027
 int layout com_facebook_friendpickerfragment 0x7f030000

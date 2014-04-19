@@ -11,6 +11,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="DashBoard" />
+
+  <Spinner
+      android:id="@+id/select_DataSet"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
+
    <Button
         android:id="@+id/Classify"
         android:layout_width="match_parent"
