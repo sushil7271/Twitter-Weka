@@ -91,10 +91,10 @@ public class MyFilteredClassifier {
 	public void makeInstance() {
 		// Create the attributes, class and text
 		FastVector fvNominalVal = new FastVector(2);
-		fvNominalVal.addElement("Happy");
-		fvNominalVal.addElement("Stressed");
+		fvNominalVal.addElement("happy");
+		fvNominalVal.addElement("sad");
 		//fvNominalVal.addElement("sad");
-		//fvNominalVal.addElement("fear");
+		fvNominalVal.addElement("fear");
 		Attribute attribute1 = new Attribute("class", fvNominalVal);
 		Attribute attribute2 = new Attribute("text",(FastVector) null);
 		// Create list of instances with one element
@@ -134,23 +134,29 @@ public class MyFilteredClassifier {
 			System.out.println("Accuracy percentage" + classAtt1Prob*100);
 			System.out.println("Accuracy percentage" + classAtt2Prob*100);
 			//System.out.println("Accuracy percentage" + classAtt3Prob*100);
-			return instances.classAttribute().value((int) pred)+" :- "+round(classAtt2Prob,2)*100+"%";	
+			if(instances.classAttribute().value((int) pred).equals("happy")){
+				int y =(int) (100-(round(classAtt1Prob,2)*100));
+				return "sad"+" :- "+y+"%";
+			}else{
+				return instances.classAttribute().value((int) pred)+" :- "+round(classAtt1Prob,2)*100+"%";	
+			}
+
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("Problem found when classifying the text");
 			return null;
-			
+
 		}
 
 	}
 	public static double round(double value, int places) {
-	    if (places < 0) throw new IllegalArgumentException();
+		if (places < 0) throw new IllegalArgumentException();
 
-	    long factor = (long) Math.pow(10, places);
-	    value = value * factor;
-	    long tmp = Math.round(value);
-	    return (double) tmp / factor;
+		long factor = (long) Math.pow(10, places);
+		value = value * factor;
+		long tmp = Math.round(value);
+		return (double) tmp / factor;
 	}
 	/**
 	 * Main method. It is an example of the usage of this class.

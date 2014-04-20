@@ -56,12 +56,12 @@ public class TweetsActivity extends ListActivity implements OnClickListener, OnI
 		select_DataSet=(Spinner)findViewById(R.id.select_DataSet);
 		select_DataSet.setOnItemSelectedListener(this);
 		
-		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_150.arff");
-		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_200.arff");
-		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_250.arff");
-		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_300.arff");
-		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_400.arff");
-		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_700.arff");
+		datasetPathlist.add("ISEAR_Happy_Sad_150");
+		datasetPathlist.add("ISEAR_Happy_Sad_200");
+		datasetPathlist.add("ISEAR_Happy_Sad_250");
+		datasetPathlist.add("ISEAR_Happy_Sad_300");
+		datasetPathlist.add("ISEAR_Happy_Sad_400");
+		datasetPathlist.add("ISEAR_Happy_Sad_700");
 /*			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_200.arff")));
 			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_250.arff")));
 			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_300.arff")));
@@ -214,9 +214,10 @@ public class TweetsActivity extends ListActivity implements OnClickListener, OnI
 	public void onItemSelected(AdapterView<?> parent, View view, int position,
 			long id) {
 		
-		Selected_DatasetPath=datasetPathlist.get(position);
+		Selected_DatasetPath="/sdcard/New Folder/"+datasetPathlist.get(position)+".arff";
 		System.out.println("Selected_DatasetPath :-"+Selected_DatasetPath);
-		modelurl=datasetPathlist.get(position).substring(0, datasetPathlist.get(position).lastIndexOf('.'))+".model";
+		
+		modelurl=Selected_DatasetPath.substring(0, Selected_DatasetPath.lastIndexOf('.'))+".model";
 		System.out.println("modelurl :-"+modelurl);
 		/*String finalmodelurl=modelurl.substring(0,modelurl.lastIndexOf('/'));
 		System.out.println("finalmodelurl :- "+finalmodelurl);*/
