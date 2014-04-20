@@ -56,12 +56,12 @@ public class TweetsActivity extends ListActivity implements OnClickListener, OnI
 		select_DataSet=(Spinner)findViewById(R.id.select_DataSet);
 		select_DataSet.setOnItemSelectedListener(this);
 		
-			datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_150.arff");
-			datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_200.arff");
-			datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_250.arff");
-			datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_300.arff");
-			datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_400.arff");
-			datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_700.arff");
+		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_150.arff");
+		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_200.arff");
+		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_250.arff");
+		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_300.arff");
+		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_400.arff");
+		datasetPathlist.add(Environment.getExternalStorageDirectory().getPath()+"New Folder/ISEAR_Happy_Sad_700.arff");
 /*			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_200.arff")));
 			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_250.arff")));
 			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_300.arff")));
