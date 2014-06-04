@@ -51,6 +51,8 @@
          <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/app_id" />
+         <activity android:name="com.sromku.simple.fb.example.MainActivity"></activity>
+         
     </application>
 
 </manifest>

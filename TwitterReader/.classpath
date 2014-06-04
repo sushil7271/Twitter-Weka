@@ -11,5 +11,8 @@
 	<classpathentry exported="true" kind="lib" path="assets/gson-2.2.4.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry exported="true" kind="lib" path="libs/activation.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/additionnal.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/mail.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

@@ -491,15 +491,16 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
 	private void getpost(){
 		try {
 
-			/*Session.openActiveSessionWithAccessToken(this, token, new Session.StatusCallback() {
+		/*	Session.openActiveSessionWithAccessToken(this, token, new Session.StatusCallback() {
 
 				@Override
 				public void call(Session session, SessionState state, Exception exception) {
 					// TODO Auto-generated method stub
 */
 					/*if (Session.isOpened()) {*/
-			Log.d("Graph API", "Graph API");
-					Session session = Session.getActiveSession();
+			
+			Session	session = Session.getActiveSession();
+					Log.d("Graph API", " 1 Graph API");
 						Request.newGraphPathRequest( session, "me/home", new Request.Callback() {
 									@Override
 									public void onCompleted( Response response) {
@@ -528,8 +529,8 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
 					/*} else {
 						System.out .println("KONEKCIJA NIJE OTVORENA");
 					}*/
-/*
-				}
+
+			/*	}
 			});*/
 
 		} catch (Exception e) {

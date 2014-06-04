@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -31,9 +32,11 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.sromku.simple.fb.example.MainActivity;
 import com.tmm.android.facebook.HelloFacebookSampleActivity;
 import com.tmm.android.twitter.appliaction.TwitterApplication;
 import com.tmm.android.twitter.reader.TweetReader;
+import com.tmm.android.twitter.util.GMailSender;
 import com.tmm.android.weka.MyFilteredClassifier;
 import com.tmm.android.weka.MyFilteredLearner;
 
@@ -44,9 +47,9 @@ public class TweetsActivity extends ListActivity implements OnClickListener, OnI
 	String ClassifiedClass="";
 	Twitter t;
 	Spinner select_DataSet;
-	String Selected_DatasetPath="";
+	public static String Selected_DatasetPath="";
 	ArrayList<String> datasetPathlist =new ArrayList<String>();
-	String modelurl="";
+	public static String modelurl="";
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -55,19 +58,19 @@ public class TweetsActivity extends ListActivity implements OnClickListener, OnI
 
 		select_DataSet=(Spinner)findViewById(R.id.select_DataSet);
 		select_DataSet.setOnItemSelectedListener(this);
-		
+
 		datasetPathlist.add("ISEAR_Happy_Sad_150");
 		datasetPathlist.add("ISEAR_Happy_Sad_200");
 		datasetPathlist.add("ISEAR_Happy_Sad_250");
 		datasetPathlist.add("ISEAR_Happy_Sad_300");
 		datasetPathlist.add("ISEAR_Happy_Sad_400");
 		datasetPathlist.add("ISEAR_Happy_Sad_700");
-/*			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_200.arff")));
+		/*			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_200.arff")));
 			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_250.arff")));
 			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_300.arff")));
 			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_400.arff")));
 			datasetPathlist.add(getStringFromInputStream(this.getAssets().open("dataset/ISEAR_Happy_Sad_700.arff")));*/
-		
+
 		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, datasetPathlist);
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		select_DataSet.setAdapter(dataAdapter);
@@ -76,7 +79,7 @@ public class TweetsActivity extends ListActivity implements OnClickListener, OnI
 		Button buttonClassify =(Button)findViewById(R.id.Classify);
 		buttonClassify.setOnClickListener(this);
 		Button buttonfacebook =(Button)findViewById(R.id.facebook);
-		buttonfacebook.setVisibility(View.GONE);
+
 		buttonfacebook.setOnClickListener(this);
 
 		t = ((TwitterApplication)getApplication()).getTwitter();
@@ -170,7 +173,16 @@ public class TweetsActivity extends ListActivity implements OnClickListener, OnI
 								@Override
 								public void run() {
 									// TODO Auto-generated method stub
-									showAlert("You are "+ClassifiedClass);
+									showAlert(TweetsActivity.this,"You are "+ClassifiedClass);
+									try {
+										SendEmail("Stress Level",t.getScreenName()+"stress level is above 80%now he needs counseling ","","");
+									} catch (IllegalStateException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									} catch (TwitterException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
 								}
 							});
 						} catch (Exception e) {
@@ -182,11 +194,11 @@ public class TweetsActivity extends ListActivity implements OnClickListener, OnI
 					}
 				}.start();
 			}else{
-				showAlert("Please Select the Dataset.");
+				showAlert(TweetsActivity.this,"Please Select the Dataset.");
 			}
 			break;
 		case R.id.facebook:
-			startActivity(new Intent(TweetsActivity.this,HelloFacebookSampleActivity.class));
+			startActivity(new Intent(TweetsActivity.this,MainActivity.class));
 
 			break;
 		default:
@@ -194,8 +206,8 @@ public class TweetsActivity extends ListActivity implements OnClickListener, OnI
 
 		}
 	} 
-	private void showAlert(String Message){
-		AlertDialog.Builder builder1 = new AlertDialog.Builder(TweetsActivity.this);
+	public static void showAlert(Activity  act,String Message){
+		AlertDialog.Builder builder1 = new AlertDialog.Builder(act);
 		builder1.setMessage(Message);
 		builder1.setCancelable(true);
 		builder1.setPositiveButton("Ok",
@@ -208,15 +220,22 @@ public class TweetsActivity extends ListActivity implements OnClickListener, OnI
 		alert11.show();
 	}
 
-
+	public void SendEmail(String subject,String body,String to,String from){
+		try {   
+			GMailSender sender = new GMailSender("username@gmail.com", "password");
+			sender.sendMail(subject, body,  to,    from);   
+		} catch (Exception e) {   
+			Log.e("SendMail", e.getMessage(), e);   
+		} 
+	}
 
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position,
 			long id) {
-		
+
 		Selected_DatasetPath="/sdcard/New Folder/"+datasetPathlist.get(position)+".arff";
 		System.out.println("Selected_DatasetPath :-"+Selected_DatasetPath);
-		
+
 		modelurl=Selected_DatasetPath.substring(0, Selected_DatasetPath.lastIndexOf('.'))+".model";
 		System.out.println("modelurl :-"+modelurl);
 		/*String finalmodelurl=modelurl.substring(0,modelurl.lastIndexOf('/'));
@@ -226,37 +245,37 @@ public class TweetsActivity extends ListActivity implements OnClickListener, OnI
 	@Override
 	public void onNothingSelected(AdapterView<?> parent) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	// convert InputStream to String
-		private static String getStringFromInputStream(InputStream is) {
-	 
-			BufferedReader br = null;
-			StringBuilder sb = new StringBuilder();
-	 
-			String line;
-			try {
-	 
-				br = new BufferedReader(new InputStreamReader(is));
-				while ((line = br.readLine()) != null) {
-					sb.append(line);
-				}
-	 
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				if (br != null) {
-					try {
-						br.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+	private static String getStringFromInputStream(InputStream is) {
+
+		BufferedReader br = null;
+		StringBuilder sb = new StringBuilder();
+
+		String line;
+		try {
+
+			br = new BufferedReader(new InputStreamReader(is));
+			while ((line = br.readLine()) != null) {
+				sb.append(line);
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
-	 
-			return sb.toString();
-	 
 		}
+
+		return sb.toString();
+
+	}
 
 }
