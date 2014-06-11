@@ -18,6 +18,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.sromku.simple.fb.example.MainActivity;
 import com.tmm.android.twitter.appliaction.TwitterApplication;
 import com.tmm.android.twitter.util.Constants;
 
@@ -41,35 +42,52 @@ public class AuthActivity extends Activity {
 		System.setProperty("http.keepAlive", "false");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_oauth);
-		
+		Button buttonfacebook =(Button)findViewById(R.id.facebook);
+		buttonfacebook.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				startActivity(new Intent(AuthActivity.this,MainActivity.class));
+			}
+		});
+		buttonLogin = (Button)findViewById(R.id.ButtonLogin);
+		buttonLogin.setOnClickListener(new OnClickListener() {  
+			public void onClick(View v) {
+				if(checkForSavedLogin()){
+					startFirstActivity();
+				}else{
+					askOAuth();
+				}
+				
+			}
+		});
 		//check for saved log in details..
-		checkForSavedLogin();
-
+	//	checkForSavedLogin();
+		
 		//set consumer and provider on teh Application service
 		getConsumerProvider();
 		
 		//Define login button and listener
-		buttonLogin = (Button)findViewById(R.id.ButtonLogin);
-		buttonLogin.setOnClickListener(new OnClickListener() {  
-			public void onClick(View v) {
-				askOAuth();
-			}
-		});
+		
 	}
 
-	private void checkForSavedLogin() {
+	private boolean checkForSavedLogin() {
 		// Get Access Token and persist it
 		AccessToken a = getAccessToken();
-		if (a==null) return;	//if there are no credentials stored then return to usual activity
-
-		// initialize Twitter4J
-		twitter = new TwitterFactory().getInstance();
-		twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
-		twitter.setOAuthAccessToken(a);
-		((TwitterApplication)getApplication()).setTwitter(twitter);
-		
-		startFirstActivity();
-		finish();
+		if (a==null) {
+			return false;	//if there are no credentials stored then return to usual activity
+		}else{
+			// initialize Twitter4J
+			twitter = new TwitterFactory().getInstance();
+			twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+			twitter.setOAuthAccessToken(a); 
+			((TwitterApplication)getApplication()).setTwitter(twitter);
+			
+			
+			//finish();
+			return true;
+		}
 	}
 
 	/**

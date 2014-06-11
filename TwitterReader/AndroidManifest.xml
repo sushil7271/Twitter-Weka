@@ -38,7 +38,7 @@
         </activity>
         <activity android:name=".DashboardActivity" >
         </activity>
-        <activity android:name="com.tmm.Twitter.MainActivity" >
+        <activity android:name="com.tmm.Twitter.GetTweets" >
         </activity>
         <activity android:name="com.tmm.android.facebook.HelloFacebookSampleActivity" >
         </activity>

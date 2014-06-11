@@ -17,7 +17,7 @@ public class FollowerListAdapter extends BaseAdapter
 {
 	ArrayList<String> _follwerList =  new ArrayList<String>();
 	Activity activity;
-	public FollowerListAdapter(DashboardActivity dashboardActivity,
+	public FollowerListAdapter(Activity dashboardActivity,
 			ArrayList<String> follwersNameList) {
 		this._follwerList=follwersNameList;
 		this.activity= dashboardActivity;

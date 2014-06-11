@@ -40,6 +40,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 
 import com.google.gson.Gson;
+import com.tmm.android.twitter.OnTaskCompleted;
 import com.tmm.android.twitter.R;
 import com.tmm.android.twitter.TweetsActivity;
 import com.tmm.android.twitter.reader.TweetReader;
@@ -49,15 +50,19 @@ import com.tmm.android.weka.MyFilteredLearner;
 /**
  * Demonstrates how to use a twitter application keys to access a user's timeline
  */
-public class MainActivity extends ListActivity implements OnClickListener {
+public class GetTweets   {
 
-	private ListActivity activity;
-	private String ClassifiedClass="";
+
 	String ScreenName = "sushil7271";//"therockncoder";
 	final static String LOG_TAG = "rnc";
 	Button Classify_follwerTweets;
-	ArrayList<Tweet> jobs ;
+	ArrayList<Tweet> jobs = new ArrayList<Tweet>(); ;
 
+	private OnTaskCompleted listener;
+	 public GetTweets(OnTaskCompleted listener){
+	        this.listener=listener;
+	    }
+	/*
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -67,12 +72,12 @@ public class MainActivity extends ListActivity implements OnClickListener {
 		ScreenName= getIntent().getStringExtra("ScreenName");
 		Classify_follwerTweets=(Button)findViewById(R.id.Classify_follwerTweets);
 		Classify_follwerTweets.setOnClickListener(this);
-		downloadTweets();
-	}
+		//downloadTweets();
+	}*/
 
 	// download twitter timeline after first checking to see if there is a network connection
-	public void downloadTweets() {
-		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	public void downloadTweets(Context context) {
+		ConnectivityManager connMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
 		if (networkInfo != null && networkInfo.isConnected()) {
@@ -105,15 +110,16 @@ public class MainActivity extends ListActivity implements OnClickListener {
 			Log.d("result", result);
 			Twitter twits = jsonToTwitter(result);
 			jobs=twits;
+			listener.onTaskCompleted(jobs);
 			// lets write the results to the console as well
 			for (Tweet tweet : twits) {
 				Log.i(LOG_TAG, tweet.getText());
-				
 			}
-	//		jobs = TweetReader.retrieveSpecificUsersTweets((twitter4j.Twitter) twits);
+			//return jobs;
+			//		jobs = TweetReader.retrieveSpecificUsersTweets((twitter4j.Twitter) twits);
 			// send the tweets to the adapter for rendering
-			ArrayAdapter<Tweet> adapter = new ArrayAdapter<Tweet>(activity, android.R.layout.simple_list_item_1, twits);
-			setListAdapter(adapter);
+			//ArrayAdapter<Tweet> adapter = new ArrayAdapter<Tweet>(activity, android.R.layout.simple_list_item_1, twits);
+			//setListAdapter(adapter);
 		}
 
 		// converts a string of JSON data into a Twitter object
@@ -218,7 +224,7 @@ public class MainActivity extends ListActivity implements OnClickListener {
 		}
 	}
 
-	@Override
+	/*@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
@@ -271,7 +277,7 @@ public class MainActivity extends ListActivity implements OnClickListener {
 			break;
 		}
 	}
-
+	 */
 
 
 	public void generateNoteOnSD(String Path,String sFileName, ArrayList<Tweet> sBody)
@@ -298,7 +304,7 @@ public class MainActivity extends ListActivity implements OnClickListener {
 			//iError();
 		}
 	}
-	private void showAlert(String Message){
+	/*private void showAlert(String Message){
 		AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
 		builder1.setMessage(Message);
 		builder1.setCancelable(true);
@@ -310,5 +316,5 @@ public class MainActivity extends ListActivity implements OnClickListener {
 		});
 		AlertDialog alert11 = builder1.create();
 		alert11.show();
-	}
+	}*/
 }
