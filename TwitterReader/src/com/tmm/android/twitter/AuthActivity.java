@@ -42,7 +42,7 @@ public class AuthActivity extends Activity {
 		System.setProperty("http.keepAlive", "false");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_oauth);
-		Button buttonfacebook =(Button)findViewById(R.id.facebook);
+		/*Button buttonfacebook =(Button)findViewById(R.id.facebook);
 		buttonfacebook.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -50,7 +50,7 @@ public class AuthActivity extends Activity {
 				// TODO Auto-generated method stub
 				startActivity(new Intent(AuthActivity.this,MainActivity.class));
 			}
-		});
+		});*/
 		buttonLogin = (Button)findViewById(R.id.ButtonLogin);
 		buttonLogin.setOnClickListener(new OnClickListener() {  
 			public void onClick(View v) {

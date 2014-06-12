@@ -15,12 +15,19 @@ package com.tmm.android.weka;
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+import twitter4j.TwitterException;
 import weka.core.*;
-import weka.core.FastVector;
 import weka.classifiers.meta.FilteredClassifier;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.*;
+
+import android.text.Html;
+import android.text.Spanned;
+import android.util.Log;
+
+import com.tmm.android.twitter.TweetsActivity;
+import com.tmm.android.twitter.util.GMailSender;
 
 /**
  * This class implements a simple text classifier in Java using WEKA.
@@ -117,8 +124,10 @@ public class MyFilteredClassifier {
 	/**
 	 * This method performs the classification of the instance.
 	 * Output is done at the command-line.
+	 * @param ScreenName 
+	 * @param mailID 
 	 */
-	public String classify() {
+	public String classify(String ScreenName, String mailID) {
 		try {
 			double pred = classifier.classifyInstance(instances.instance(0));
 			System.out.println("===== Classified instance =====");
@@ -136,8 +145,25 @@ public class MyFilteredClassifier {
 			//System.out.println("Accuracy percentage" + classAtt3Prob*100);
 			if(instances.classAttribute().value((int) pred).equals("happy")){
 				int y =(int) (100-(round(classAtt1Prob,2)*100));
+				
+				if(y>80){
+					try {
+						SendEmail(ScreenName,mailID,"sushil7271@gmail.com");
+					} catch (IllegalStateException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 				return "sad"+" :- "+y+"%";
 			}else{
+				if(round(classAtt1Prob,2)*100>80){
+					try {
+						SendEmail(ScreenName,"sushil7271@gmail.com","Pallavi.phalke15@gmail.com");
+					} catch (IllegalStateException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 				return instances.classAttribute().value((int) pred)+" :- "+round(classAtt1Prob,2)*100+"%";	
 			}
 
@@ -158,6 +184,40 @@ public class MyFilteredClassifier {
 		long tmp = Math.round(value);
 		return (double) tmp / factor;
 	}
+	
+	public void SendEmail(String username,String to,String from){
+		String Subject="Emotional Support to your friend.";
+		Spanned marked_up = Html.fromHtml("Hello Dear,<br><p>This is auto generated mail from "+ username+" regarding his/her current emotional state."
+				+"Your friend’s Emotional Level is beyond 80% ,so he /she need support to prevent any wrong step.</p>"
+				+"<b>HOW CAN YOU HELP YOUR FRIEND?</b><br>"
+				+"<br>When do people need emotional support?"
+				+"<br><p>People become upset for any number of different reasons. Distress can be a reaction to a common but disturbing life experience – an accident, a child hurt in a playground, someone injured in traffic – or after receiving bad news. Or it could be as a result of a very exceptional event, a plane crash, train derailment, major weather event or act of violence. Or it could be a build-up of many events, causing overload and stress."
+				+"Whatever the cause of the emotional upset, the principles of helping are broadly the same. And they hold good whether you are helping a stranger in a first-aid situation, or a friend, colleague or relative.</p>"
+				+"<b>What is the first step?</b>"
+				+"<p>Carry out a quick but thoughtful assessment of the situation. What is happening? Are there any hazards? Notice who else is around. Are they likely to be helpful, or otherwise?"
+				+"Then, crucially, check yourself. Think about what shape you are in. How have you been affected by the situation? The aim is to be calm. If you are calm, you can help others. If you aren\'t, you probably can\'t, at the moment."
+				+"If you are calm enough to help someone else, that\'s good. If you are not, you might look for help for yourself.</p>"
+				+"<b>How do you help someone who is upset?</b>"
+				+"<p>Good listening is a very good start. It is harder, and rarer, than a lot of people think. Give people time to talk. Give them space, too – don\'t crowd them. Make eye contact appropriately, but don\'t stare. Be physically still and relaxed, not agitated or using sudden body movements. When you talk, use a calm voice. Don’t shout and don’t whisper. Don\'t interrupt."
+				+"It is best to avoid false reassurance, such as, \"everything will be okay\". After all, it might not be. And even if it is, that is not how the person is feeling at that moment."
+				+"Offer non-verbal encouragement—\"mmm\" and so on. That can indicate that you are listening, and are happy to hear what the person has to say. A good way to show you have understood is to to reflect out loud on what the person has said: “so, you’re very worried about that,” for instance."
+				+"All the time, watch how the person is responding. Listen and learn from what they tell you about how they are feeling. Adapt your style to suit them."
+				+"Accept their response – don’t argue or disagree with them. If you think something else is advisable, such as a medical check-up, calmly explain why.</p>"
+
+				+"<b>What are things to avoid?</b>"
+				+"Here are some basic mistakes to steer clear of:<br>"
+				+"<br>- Don\'t try to jolly people up and get them to look at the funny side. They might do that later, but your task is to respect how they\'re feeling now and help them deal with it, not suppress it."
+				+"<br>- Don\'t say things like, \"I know just how you are feeling, just the same happened to me\". This isn\'t empathy, it is more like boasting. It is very alienating and irritating."
+				+"<br>- Don\'t hurry the next action. Always remember that a person who is upset is vulnerable and probably not in a state for successful decision-making.");
+
+		try {   
+			GMailSender sender = new GMailSender("Pallavi.phalke15@gmail.com", "Ganesha * 15");
+			sender.sendMail(Subject, marked_up.toString(),  to, from);   
+		} catch (Exception e) {   
+			Log.e("SendMail", e.getMessage(), e);   
+		} 
+	}
+
 	/**
 	 * Main method. It is an example of the usage of this class.
 	 * @param args Command-line arguments: fileData and fileModel.

@@ -33,9 +33,7 @@ import com.sromku.simple.fb.Permission;
 import com.sromku.simple.fb.SimpleFacebook;
 import com.sromku.simple.fb.actions.Cursor;
 import com.sromku.simple.fb.entities.Post;
-import com.sromku.simple.fb.example.Example;
-import com.sromku.simple.fb.example.ExamplesAdapter;
-import com.sromku.simple.fb.example.MainActivity;
+
 import com.sromku.simple.fb.listeners.OnLoginListener;
 import com.sromku.simple.fb.listeners.OnLogoutListener;
 import com.sromku.simple.fb.listeners.OnPostsListener;
@@ -184,7 +182,7 @@ public class MainFragment extends BaseFragment {
 							classifier.load(Environment.getExternalStorageDirectory()+"/New Folder/FacebookPost.txt");
 							classifier.loadModel(TweetsActivity.modelurl);
 							classifier.makeInstance();
-							ClassifiedClass=classifier.classify();
+							//ClassifiedClass=classifier.classify();
 							getActivity().runOnUiThread(new Runnable() {
 
 								@Override

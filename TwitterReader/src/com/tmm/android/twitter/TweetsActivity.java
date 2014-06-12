@@ -1,13 +1,12 @@
 package com.tmm.android.twitter;
 
-import java.io.BufferedReader;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,10 +18,10 @@ import twitter4j.User;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Html;
@@ -35,51 +34,95 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.Spinner;
-import android.widget.Toast;
-
-import com.google.gson.JsonObject;
-import com.sromku.simple.fb.example.MainActivity;
+import android.widget.TextView;
+import com.sromku.simple.fb.Permission;
+import com.sromku.simple.fb.SimpleFacebook;
+import com.sromku.simple.fb.actions.Cursor;
+import com.sromku.simple.fb.entities.Post;
+import com.sromku.simple.fb.example.utils.Utils;
+import com.sromku.simple.fb.listeners.OnLoginListener;
+import com.sromku.simple.fb.listeners.OnPostsListener;
 import com.tmm.Twitter.Tweet;
-import com.tmm.android.facebook.HelloFacebookSampleActivity;
-import com.tmm.android.twitter.appliaction.TwitterApplication;
 import com.tmm.android.twitter.reader.TweetReader;
-import com.tmm.android.twitter.util.GMailSender;
 import com.tmm.android.weka.MyFilteredClassifier;
 import com.tmm.android.weka.MyFilteredLearner;
+import com.tmm.android.twitter.appliaction.TwitterApplication;
 
-public class TweetsActivity extends Activity implements OnClickListener, OnItemSelectedListener, OnTaskCompleted,OnItemClickListener {
-
+public class TweetsActivity extends Activity implements OnClickListener, OnItemSelectedListener, OnTaskCompleted,OnItemClickListener, OnCheckedChangeListener {
+	protected static final String TAG = TweetsActivity.class.getName();
 	private TwitterListAdapter adapter;
 	ArrayList<JSONObject> jobs ;
 	String ClassifiedClass="";
 	Twitter t;
 	ArrayList<String> FollwersNameList = new ArrayList<String>();
-	ListView follwerListView,twitterlist;
+	ListView follwerListView,twitterlist,facebookPostlistView;
 	String ScreenName="";
 	Spinner select_DataSet;
 	public static String Selected_DatasetPath="";
-	ArrayList<String> datasetPathlist =new ArrayList<String>();
+	ArrayList<String> ISEARdatasetPathlist =new ArrayList<String>();
+	ArrayList<String> wordnetdatasetPathlist =new ArrayList<String>();
+	ArrayList<String> FacebookPostList =new ArrayList<String>();
 	public static String modelurl="";
+	RadioButton ISERbtn,wordnetBtn;
+
+	Button facebook;
+	private SimpleFacebook mSimpleFacebook;
+	private String mAllPages = "";
+	private TextView Pagenumber,LoadMore;
+	private ProgressDialog mProgressDialog;
+	LinearLayout facebookPostlayout;
+	String mailID="";
+	protected void showDialog() {
+		if (mProgressDialog == null) {
+			setProgressDialog();
+		}
+		mProgressDialog.show();
+	}
+
+	protected void hideDialog() {
+		if (mProgressDialog != null && mProgressDialog.isShowing()) {
+			mProgressDialog.dismiss();
+		}
+	}
+
+	private void setProgressDialog() {
+		mProgressDialog = new ProgressDialog(TweetsActivity.this);
+		mProgressDialog.setTitle("Thinking...");
+		mProgressDialog.setMessage("Doing the action...");
+	}
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
+		mSimpleFacebook = SimpleFacebook.getInstance(this);
+
+		// test local language
+		Utils.updateLanguage(getApplicationContext(), "en");
+		Utils.printHashKey(getApplicationContext());
+
 		select_DataSet=(Spinner)findViewById(R.id.select_DataSet);
 		select_DataSet.setOnItemSelectedListener(this);
 
-		datasetPathlist.add("ISEAR_Happy_Sad_150");
-		datasetPathlist.add("ISEAR_Happy_Sad_200");
-		datasetPathlist.add("ISEAR_Happy_Sad_250");
-		datasetPathlist.add("ISEAR_Happy_Sad_300");
-		datasetPathlist.add("ISEAR_Happy_Sad_400");
-		datasetPathlist.add("ISEAR_Happy_Sad_700");
+		ISEARdatasetPathlist.add("ISEAR_Happy_Sad_150");
+		ISEARdatasetPathlist.add("ISEAR_Happy_Sad_200");
+		ISEARdatasetPathlist.add("ISEAR_Happy_Sad_250");
+		ISEARdatasetPathlist.add("ISEAR_Happy_Sad_300");
+		ISEARdatasetPathlist.add("ISEAR_Happy_Sad_400");
+		ISEARdatasetPathlist.add("ISEAR_Happy_Sad_700");
 
-
-		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, datasetPathlist);
+		wordnetdatasetPathlist.add("happy_sad_wordnetaffect");
+		
+		t = ((TwitterApplication)getApplication()).getTwitter();
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.facebookpostitem, ISEARdatasetPathlist);
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		select_DataSet.setAdapter(dataAdapter);
 		Button buttonTweets =(Button)findViewById(R.id.Tweets);
@@ -92,26 +135,87 @@ public class TweetsActivity extends Activity implements OnClickListener, OnItemS
 		follwerListView.setOnItemClickListener(this);
 		Button Get_Follwer_List=(Button)findViewById(R.id.follwer_tweets);
 		Get_Follwer_List.setOnClickListener(this);
-		t = ((TwitterApplication)getApplication()).getTwitter();
+		facebookPostlayout=(LinearLayout)findViewById(R.id.facebookPostlayout);
+		facebook=(Button)findViewById(R.id.facebook);
+		facebook.setOnClickListener(this);
+		facebookPostlistView=(ListView)findViewById(R.id.facebookPostlist);
+		Pagenumber=(TextView)findViewById(R.id.PageNumber);
+		LoadMore=(TextView)findViewById(R.id.load_more);
+		ISERbtn=(RadioButton)findViewById(R.id.ISEARradioButton);
+		wordnetBtn=(RadioButton)findViewById(R.id.WordNetradioButton2);
+		ISERbtn.setChecked(true);
+		ISERbtn.setOnCheckedChangeListener(this);
+		wordnetBtn.setOnCheckedChangeListener(this);
+		facebookPostlayout.setVisibility(View.INVISIBLE);
+		checkTheVisibility();
 
-		jobs = TweetReader.retrieveSpecificUsersTweets(t);
-		adapter = new TwitterListAdapter(this,jobs);
-		//generateNoteOnSD("TweetsTxtFile.txt",jobs);
-		twitterlist.setAdapter(adapter);
-		try {
-			PagableResponseList<User> usersResponse  = t.getFollowersList(t.getScreenName(), -1);
-			System.out.println(usersResponse);
-			for (int index = 0; index < usersResponse.size(); index++) {
-				FollwersNameList.add(usersResponse.get(index).getScreenName());
+		new DownloadtheTweets().execute(t);
+	}
+
+
+	public void GetTheMailID(){
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Mail ID");
+		alert.setMessage("Please Provide the Email-ID");
+
+		// Set an EditText view to get user input 
+		final EditText input = new EditText(this);
+		alert.setView(input);
+
+		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				mailID = input.getText().toString();
+				dialog.dismiss();
+				// Do something with value!
 			}
+		});
+
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				// Canceled.
+				dialog.dismiss();
+			}
+		});
+
+		alert.show();
+	}
+	class DownloadtheTweets extends AsyncTask<Twitter, Void, Void>{
+
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			showDialog();
+		}
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			adapter = new TwitterListAdapter(TweetsActivity.this,jobs);
+			//generateNoteOnSD("TweetsTxtFile.txt",jobs);
+			twitterlist.setAdapter(adapter);
 			FollowerListAdapter adapter = new FollowerListAdapter(TweetsActivity.this,FollwersNameList);
 			follwerListView.setAdapter(adapter);
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			hideDialog();
+			GetTheMailID();
 		}
-		
-		//Toast.makeText(TweetsActivity.this, ClassifiedClass, Toast.LENGTH_LONG);
+		@Override
+		protected Void doInBackground(Twitter... params) {
+			jobs = TweetReader.retrieveSpecificUsersTweets(params[0]);
+			try {
+				PagableResponseList<User> usersResponse  = params[0].getFollowersList(params[0].getScreenName(), -1);
+				System.out.println(usersResponse);
+				for (int index = 0; index < usersResponse.size(); index++) {
+					FollwersNameList.add(usersResponse.get(index).getScreenName());
+				}
+
+			} catch (TwitterException e) {
+
+				e.printStackTrace();
+			}
+			return null;
+		}
 	}
 
 	public void generateNoteOnSD(String Path,String sFileName, ArrayList<?> sBody)
@@ -142,6 +246,31 @@ public class TweetsActivity extends Activity implements OnClickListener, OnItemS
 			//iError();
 		}
 	}
+	public void generateFacebookPostNoteOnSD(String Path,String sFileName, ArrayList<?> sBody)
+	{
+		try
+		{
+			File root = new File(Path);
+			if (!root.exists()) {
+				root.mkdirs();
+			}
+			File gpxfile = new File(root, sFileName);
+			FileWriter writer = new FileWriter(gpxfile);
+			for (int i = 0; i < sBody.size(); i++) {
+				Log.e("facebook", ((String) sBody.get(i)));
+				writer.append(i+1+". "+((String) sBody.get(i)));
+			}
+			writer.flush();
+			writer.close();
+			//Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+			// importError = e.getMessage();
+			//iError();
+		}
+	}
 
 	@SuppressLint("ShowToast")
 	@Override
@@ -152,27 +281,60 @@ public class TweetsActivity extends Activity implements OnClickListener, OnItemS
 		case R.id.Tweets:
 			twitterlist.setVisibility(View.VISIBLE);
 			follwerListView.setVisibility(View.GONE);
-
+			facebookPostlayout.setVisibility(View.GONE);
 			break;
 		case R.id.follwer_tweets:
 			twitterlist.setVisibility(View.GONE);
+			facebookPostlayout.setVisibility(View.GONE);
 			follwerListView.setVisibility(View.VISIBLE);
 			break;
 		case R.id.Classify:
-			
-			ClassifyMethod(jobs);
+			if(checkTheVisibility()){
+				ClassifyMethod(FacebookPostList);	
+			}else{
+				ClassifyMethod(jobs);
+			}
 			break;
 
 
-			/*case R.id.facebook:
-			startActivity(new Intent(TweetsActivity.this,MainActivity.class));
-
-			break;*/
+		case R.id.facebook:
+			facebookPostlayout.setVisibility(View.VISIBLE);
+			twitterlist.setVisibility(View.GONE);
+			follwerListView.setVisibility(View.GONE);
+			if (mSimpleFacebook.isLogin()) {
+				getFaceBookPost();
+			}else{
+				mSimpleFacebook.login(onLoginListener);
+			}
+			break;
 		default:
 			break;
 
 		}
 	} 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mSimpleFacebook = SimpleFacebook.getInstance(this);
+	}
+
+	public boolean checkTheVisibility(){
+		if(facebookPostlayout.getVisibility() == View.VISIBLE){
+			Log.d(TAG, "Facebook is visible");
+			System.out.println("Facebook is visible");
+			return true;
+		}else{
+			Log.d(TAG, "Facebook is Not visible");
+			System.out.println("Facebook is Not visible");
+			return false;
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		mSimpleFacebook.onActivityResult(this, requestCode, resultCode, data);
+	}
 	public static void showAlert(Activity  act,String Message){
 		AlertDialog.Builder builder1 = new AlertDialog.Builder(act);
 		builder1.setMessage(Message);
@@ -187,39 +349,7 @@ public class TweetsActivity extends Activity implements OnClickListener, OnItemS
 		alert11.show();
 	}
 
-	public void SendEmail(String username,String to,String from){
-		String Subject="Emotional Support to your friend.";
-		Spanned marked_up = Html.fromHtml("Hello Dear,<br><p>This is auto generated mail from "+ username+" regarding his/her current emotional state."
-				+"Your friend’s Emotional Level is beyond 80% ,so he /she need support to prevent any wrong step.</p>"
-				+"<b>HOW CAN YOU HELP YOUR FRIEND?</b><br>"
-				+"<br>When do people need emotional support?"
-				+"<br><p>People become upset for any number of different reasons. Distress can be a reaction to a common but disturbing life experience – an accident, a child hurt in a playground, someone injured in traffic – or after receiving bad news. Or it could be as a result of a very exceptional event, a plane crash, train derailment, major weather event or act of violence. Or it could be a build-up of many events, causing overload and stress."
-				+"Whatever the cause of the emotional upset, the principles of helping are broadly the same. And they hold good whether you are helping a stranger in a first-aid situation, or a friend, colleague or relative.</p>"
-				+"<b>What is the first step?</b>"
-				+"<p>Carry out a quick but thoughtful assessment of the situation. What is happening? Are there any hazards? Notice who else is around. Are they likely to be helpful, or otherwise?"
-				+"Then, crucially, check yourself. Think about what shape you are in. How have you been affected by the situation? The aim is to be calm. If you are calm, you can help others. If you aren\'t, you probably can\'t, at the moment."
-				+"If you are calm enough to help someone else, that\'s good. If you are not, you might look for help for yourself.</p>"
-				+"<b>How do you help someone who is upset?</b>"
-				+"<p>Good listening is a very good start. It is harder, and rarer, than a lot of people think. Give people time to talk. Give them space, too – don\'t crowd them. Make eye contact appropriately, but don\'t stare. Be physically still and relaxed, not agitated or using sudden body movements. When you talk, use a calm voice. Don’t shout and don’t whisper. Don\'t interrupt."
-				+"It is best to avoid false reassurance, such as, \"everything will be okay\". After all, it might not be. And even if it is, that is not how the person is feeling at that moment."
-				+"Offer non-verbal encouragement—\"mmm\" and so on. That can indicate that you are listening, and are happy to hear what the person has to say. A good way to show you have understood is to to reflect out loud on what the person has said: “so, you’re very worried about that,” for instance."
-				+"All the time, watch how the person is responding. Listen and learn from what they tell you about how they are feeling. Adapt your style to suit them."
-				+"Accept their response – don’t argue or disagree with them. If you think something else is advisable, such as a medical check-up, calmly explain why.</p>"
 
-				+"<b>What are things to avoid?</b>"
-				+"Here are some basic mistakes to steer clear of:<br>"
-				+"<br>- Don\'t try to jolly people up and get them to look at the funny side. They might do that later, but your task is to respect how they\'re feeling now and help them deal with it, not suppress it."
-				+"<br>- Don\'t say things like, \"I know just how you are feeling, just the same happened to me\". This isn\'t empathy, it is more like boasting. It is very alienating and irritating."
-				+"<br>- Don\'t hurry the next action. Always remember that a person who is upset is vulnerable and probably not in a state for successful decision-making.");
-
-		try {   
-			GMailSender sender = new GMailSender("Pallavi.phalke15@gmail.com", "Ganesha * 15");
-			sender.sendMail(Subject, marked_up.toString(),  to, from);   
-		} catch (Exception e) {   
-			Log.e("SendMail", e.getMessage(), e);   
-		} 
-	}
-	
 	private void ClassifyMethod(final ArrayList<?> tweets){
 		if(!Selected_DatasetPath.equals("")){
 			final ProgressDialog pd = new ProgressDialog(TweetsActivity.this);
@@ -231,7 +361,7 @@ public class TweetsActivity extends Activity implements OnClickListener, OnItemS
 					try {
 						MyFilteredLearner learner;
 						learner = new MyFilteredLearner();
-					
+
 						learner.loadDataset(Selected_DatasetPath);
 						// Evaluation mus be done before training
 						// More info in: http://weka.wikispaces.com/Use+WEKA+in+your+Java+code
@@ -243,30 +373,28 @@ public class TweetsActivity extends Activity implements OnClickListener, OnItemS
 
 						MyFilteredClassifier classifier = new MyFilteredClassifier();
 						if(findInstanceOf(tweets,JSONObject.class)){
-							generateNoteOnSD(Environment.getExternalStorageDirectory()+"/New Folder/","spamtextfile.txt",tweets);	
+							generateNoteOnSD(Environment.getExternalStorageDirectory()+"/New Folder/","spamtextfile.txt",tweets);
+							classifier.load(Environment.getExternalStorageDirectory()+"/New Folder/spamtextfile.txt");
+						}else if(findInstanceOf(tweets,String.class)){
+							generateFacebookPostNoteOnSD(Environment.getExternalStorageDirectory()+"/New Folder/","FacebookPost.txt",FacebookPostList);
+							classifier.load(Environment.getExternalStorageDirectory()+"/New Folder/FacebookPost.txt");
+
 						}else{
 							generateNoteforFollowerOnSD(Environment.getExternalStorageDirectory()+"/New Folder/","spamtextfile.txt",tweets);
+							classifier.load(Environment.getExternalStorageDirectory()+"/New Folder/spamtextfile.txt");
 						}
-						
-						classifier.load(Environment.getExternalStorageDirectory()+"/New Folder/spamtextfile.txt");
+
+						//classifier.load(Environment.getExternalStorageDirectory()+"/New Folder/spamtextfile.txt");
 						classifier.loadModel(modelurl);
 						classifier.makeInstance();
-						ClassifiedClass=classifier.classify();
+						ClassifiedClass=classifier.classify(t.getScreenName(),mailID);
 						runOnUiThread(new Runnable() {
 
 							@Override
 							public void run() {
 								// TODO Auto-generated method stub
 								showAlert(TweetsActivity.this,"You are "+ClassifiedClass);
-								try {
-									SendEmail(t.getScreenName(),"sushil7271@gmail.com","sushil7271@gmail.com");
-								} catch (IllegalStateException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								} catch (TwitterException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
+
 							}
 						});
 					} catch (Exception e) {
@@ -283,38 +411,44 @@ public class TweetsActivity extends Activity implements OnClickListener, OnItemS
 	}
 	public <T> Boolean findInstanceOf(Collection<?> arrayList, Class<T> clazz)
 	{
-	    for(Object o : arrayList)
-	    {
-	        if (o != null && o.getClass() == clazz)
-	        {
-	            return true;
-	        }else
-	        {
-	        	return false;
-	        }
-	    }
-	    return null;    
+		for(Object o : arrayList)
+		{
+			if (o != null && o.getClass() == clazz)
+			{
+				return true;
+			}else
+			{
+				return false;
+			}
+		}
+		return null;    
 	}
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int index, long arg3) {
 
 		com.tmm.Twitter.GetTweets Obj = new com.tmm.Twitter.GetTweets(TweetsActivity.this);
 		Obj.downloadTweets(TweetsActivity.this);
-		
+
 		/*Intent intent = new Intent(TweetsActivity.this,com.tmm.Twitter.MainActivity.class);
 		intent.putExtra("ScreenName", FollwersNameList.get(index));
 		startActivity(intent);*/
 	}
 	@SuppressLint("SdCardPath")
 	@Override
-	public void onItemSelected(AdapterView<?> parent, View view, int position,
-			long id) {
+	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+		if(ISERbtn.isChecked()){
+			Selected_DatasetPath="/sdcard/New Folder/"+ISEARdatasetPathlist.get(position)+".arff";
+			System.out.println("Selected_DatasetPath :-"+Selected_DatasetPath);
 
-		Selected_DatasetPath="/sdcard/New Folder/"+datasetPathlist.get(position)+".arff";
-		System.out.println("Selected_DatasetPath :-"+Selected_DatasetPath);
+			modelurl=Selected_DatasetPath.substring(0, Selected_DatasetPath.lastIndexOf('.'))+".model";
+			System.out.println("modelurl :-"+modelurl);
+		}else{
+			Selected_DatasetPath="/sdcard/New Folder/"+wordnetdatasetPathlist.get(position)+".arff";
+			System.out.println("Selected_DatasetPath :-"+Selected_DatasetPath);
 
-		modelurl=Selected_DatasetPath.substring(0, Selected_DatasetPath.lastIndexOf('.'))+".model";
-		System.out.println("modelurl :-"+modelurl);
+			modelurl=Selected_DatasetPath.substring(0, Selected_DatasetPath.lastIndexOf('.'))+".model";
+			System.out.println("modelurl :-"+modelurl);
+		}
 		/*String finalmodelurl=modelurl.substring(0,modelurl.lastIndexOf('/'));
 		System.out.println("finalmodelurl :- "+finalmodelurl);*/
 	}
@@ -325,35 +459,7 @@ public class TweetsActivity extends Activity implements OnClickListener, OnItemS
 
 	}
 
-	// convert InputStream to String
-	/*private static String getStringFromInputStream(InputStream is) {
 
-		BufferedReader br = null;
-		StringBuilder sb = new StringBuilder();
-
-		String line;
-		try {
-
-			br = new BufferedReader(new InputStreamReader(is));
-			while ((line = br.readLine()) != null) {
-				sb.append(line);
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (br != null) {
-				try {
-					br.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-		return sb.toString();
-
-	}*/
 
 	public void generateNoteforFollowerOnSD(String Path,String sFileName, ArrayList<?> sBody)
 	{
@@ -385,4 +491,135 @@ public class TweetsActivity extends Activity implements OnClickListener, OnItemS
 		// TODO Auto-generated method stub
 		ClassifyMethod(Tweets_List);
 	}
+
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+		switch (buttonView.getId()) {
+		case R.id.ISEARradioButton:
+			if(isChecked){
+				ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.facebookpostitem, ISEARdatasetPathlist);
+				dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				select_DataSet.setAdapter(dataAdapter);
+			}
+			break;
+		case R.id.WordNetradioButton2:
+			if(isChecked){
+				ArrayAdapter<String> WordNetdataAdapter = new ArrayAdapter<String>(this, R.layout.facebookpostitem, wordnetdatasetPathlist);
+				WordNetdataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				select_DataSet.setAdapter(WordNetdataAdapter);
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	////Facebook Code
+	public void getFaceBookPost(){
+		SimpleFacebook.getInstance().getPosts(new OnPostsListener() {
+
+			@Override
+			public void onThinking() {
+				showDialog();
+			}
+
+			@Override
+			public void onException(Throwable throwable) {
+				hideDialog();
+				//mResult.setText(throwable.getMessage());
+			}
+
+			@Override
+			public void onFail(String reason) {
+				hideDialog();
+				//mResult.setText(reason);
+			}
+
+			@Override
+			public void onComplete(List<Post> response) {
+				hideDialog();
+				// make the result more readable.
+				for (int i = 0; i < response.size(); i++) {
+					FacebookPostList.add(response.get(i).getStory());
+				}
+
+				ArrayAdapter<String> facebookPostdataAdapter = new ArrayAdapter<String>(TweetsActivity.this, R.layout.facebookpostitem, FacebookPostList);
+				//facebookPostdataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				facebookPostlistView.setAdapter(facebookPostdataAdapter);
+				Pagenumber.setText("Page Number "+getPageNum());
+				/*mAllPages += "<u>\u25B7\u25B7\u25B7 (paging) #" + getPageNum() + " \u25C1\u25C1\u25C1</u><br>";
+				mAllPages += com.sromku.simple.fb.utils.Utils.join(response.iterator(), "<br>", new com.sromku.simple.fb.utils.Utils.Process<Post>() {
+					@Override
+					public String process(Post post) {
+						return "\u25CF " + post.getStory() == null || post.getStory().equalsIgnoreCase("null") ? post.getId() : post.getStory() + " \u25CF";
+					}
+				});
+				mAllPages += "<br>";*/
+				//mResult.setText(Html.fromHtml(mAllPages));
+
+				// check if more pages exist
+				if (hasNext()) {
+					enableLoadMore(getCursor());
+				} else {
+					disableLoadMore();
+				}
+			}
+		});
+	}
+
+	private void enableLoadMore(final Cursor<List<Post>> cursor) {
+		LoadMore.setVisibility(View.VISIBLE);
+		LoadMore.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				mAllPages += "<br>";
+				cursor.next();
+			}
+		});
+	}
+
+	private void disableLoadMore() {
+		LoadMore.setOnClickListener(null);
+		LoadMore.setVisibility(View.INVISIBLE);
+	}
+
+
+	final OnLoginListener onLoginListener = new OnLoginListener() {
+
+		@Override
+		public void onFail(String reason) {
+			//mTextStatus.setText(reason);
+			Log.w(TAG, "Failed to login");
+		}
+
+		@Override
+		public void onException(Throwable throwable) {
+			//mTextStatus.setText("Exception: " + throwable.getMessage());
+			Log.e(TAG, "Bad thing happened", throwable);
+		}
+
+		@Override
+		public void onThinking() {
+			// show progress bar or something to the user while login is
+			// happening
+			//mTextStatus.setText("Thinking...");
+		}
+
+		@Override
+		public void onLogin() {
+			// change the state of the button or do whatever you want
+			//mTextStatus.setText("Logged in");
+			//loggedInUIState();
+			getFaceBookPost();
+		}
+
+		@Override
+		public void onNotAcceptingPermissions(Permission.Type type) {
+			//				toast(String.format("You didn't accept %s permissions", type.name()));
+		}
+	};
+
+
 }

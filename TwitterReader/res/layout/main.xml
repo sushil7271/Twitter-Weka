@@ -12,48 +12,93 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
-        <TextView
-            android:id="@+id/textView1"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:text="Select DataSet"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/black" />
+            android:layout_weight="1" >
 
-        <Spinner
-            android:id="@+id/select_DataSet"
-            android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Select DataSet"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/black" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <RadioButton
+                    android:id="@+id/ISEARradioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ISEAR"
+                    android:textColor="@android:color/black" />
+
+                <RadioButton
+                    android:id="@+id/WordNetradioButton2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="WordNet"
+                    android:textColor="@android:color/black" />
+            </RadioGroup>
+
+            <Spinner
+                android:id="@+id/select_DataSet"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/facebook"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#3B5998"
+            android:text="facebook" />
 
         <Button
             android:id="@+id/Tweets"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="Tweets" /> 
+            android:background="#34BEDA"
+            android:text="Tweets" />
 
         <Button
             android:id="@+id/Classify"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="#33CC66"
             android:text="Classify" />
 
         <Button
             android:id="@+id/follwer_tweets"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="Follwer List" />
+            android:background="#34BEDA"
+            android:text="Twitter Follwer List" />
     </LinearLayout>
 
     <RelativeLayout
@@ -65,16 +110,50 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            android:cacheColorHint="@android:color/transparent" >
+            android:cacheColorHint="@android:color/transparent"
+            android:divider="#000"
+            android:dividerHeight="2px" >
         </ListView>
 
         <ListView
             android:id="@+id/twitterlist"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="#ffffff"
+            android:background="@android:color/white"
+            android:cacheColorHint="@android:color/transparent"
             android:divider="#000"
             android:dividerHeight="2px" />
+
+        <LinearLayout
+            android:id="@+id/facebookPostlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/PageNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <ListView
+                android:id="@+id/facebookPostlist"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ffffff"
+                android:cacheColorHint="@android:color/transparent"
+                android:divider="#000"
+                android:dividerHeight="2px" />
+
+            <TextView
+                android:id="@+id/load_more"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:text="@string/load_more"
+                android:textAllCaps="true"
+                android:textColor="@color/blue" />
+        </LinearLayout>
     </RelativeLayout>
 
 </LinearLayout>
